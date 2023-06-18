@@ -5,10 +5,6 @@
 * https://infotraining.bitbucket.io/cpp-11
 * https://infotraining.bitbucket.io/cpp-11/slides
 
-## Maszyna wirtualna - VirtualBox
-
-* Link do obrazu maszyny: https://infotrainingszkolenia-my.sharepoint.com/:u:/g/personal/krystian_piekos_infotraining_pl/EQy_sl_K0_BGm27wlNuFf4MBpowx6C2TPwaE39y_0sp6gw
-
 ## Konfiguracja lokalna - toolchain
 
 Jeśli uczestnik chce skonfigurować lokalnie swoje środowisko, to należy zainstalować:
