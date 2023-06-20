@@ -121,7 +121,8 @@ int foo(int arg)
 template <typename T>
 void deduce1(T arg)
 {
-    std::cout << __FUNCSIG__ << "\n";
+    //std::cout << __FUNCSIG__ << "\n";
+    std::cout << __PRETTY_FUNCTION__ << "\n";
 }
 
 TEST_CASE("auto type deduction - case 1")
@@ -197,7 +198,7 @@ TEST_CASE("decltype")
     CHECK(vec2.size() == 3);
 
     decltype(vec1) vec3;
-    CHECK(vec1.size() == 0);
+    CHECK(vec3.size() == 0);
 
     std::map<std::string, float> coll = { {"pi", 3.14f}, {"e", 2.81f } };
 

@@ -9,7 +9,7 @@ class IGadget
 {
 public:
     virtual void use() const = 0;
-    virtual ~IGadget() { } // TODO: replace user provided implementation with default
+    virtual ~IGadget() = default;
 };
 
 class Gadget : public IGadget
@@ -18,7 +18,7 @@ class Gadget : public IGadget
     std::string name_ = "unknown";
 
 public:
-    // TODO: define default constructor
+    Gadget() = default;
 
     Gadget(int id, std::string name)
         : id_ {id}
@@ -26,7 +26,8 @@ public:
     {
     }
 
-    // TODO: delegating constructor
+    Gadget(int id) : Gadget{id, "not-set"}
+    {}
 
     int id() const
     {
@@ -38,7 +39,7 @@ public:
         return name_;
     }
 
-    void use() const // TODO: use override
+    void use() const override
     {
         std::cout << "Using gadget: " << id() << " - " << name() << "\n";
     }
@@ -47,29 +48,76 @@ public:
 class SuperGadget : public Gadget
 {
 public:
-    // TODO: inherit constructors from Gadget
+    using Gadget::Gadget;
 
     SuperGadget(int id)
         : Gadget {id, "not-set(super gadget)"}
     {
     }
 
-    void use() // TODO: control overriding a virtual function
+    void use() const override
     {
         std::cout << "Using super gadget: " << id() << " - " << name() << "\n";
     }
 };
 
-class HyperGadget /* TODO: mark class as final specialization */ : public SuperGadget
+class HyperGadget final : public SuperGadget
 {
-public:
-    // TODO: inherit constructors from SuperGadget
+public: 
+    using SuperGadget::SuperGadget;
 
-    void use() const // TODO: control overriding a virtual function
+    void use() const override
     {
         std::cout << "Using hyper gadget: " << id() << " - " << name() << "\n";
     }
 };
+
+class ISizeable
+{
+public:
+    virtual size_t size() const = 0;
+};
+
+struct A : ISizeable
+{
+    int s;
+
+    size_t size() const override { return s; }
+};
+
+void client(ISizeable& obj)
+{
+    auto s = obj.size();
+}
+
+template <typename TSizeable> 
+void client_t(TSizeable& obj)
+{
+    auto s = obj.size();
+}
+
+TEST_CASE("poly")
+{
+    A a{};
+    client(a);
+
+    std::vector<int> vec;
+    client_t(vec);
+    client_t(a);
+}
+
+TEST_CASE("virtual function")
+{
+    Gadget g{665};
+    SuperGadget sg{42};
+
+    g.use(); // Gagdet::use()
+    sg.use(); // SuperGadget::use()
+    sg.Gadget::use(); // Gadget::use()
+
+    IGadget* ptr_g = &sg;
+    ptr_g->use(); // SuperGadget
+}
 
 // TEST_CASE("inheritance of constructors")
 // {

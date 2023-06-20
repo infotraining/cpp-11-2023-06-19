@@ -55,7 +55,7 @@ TEST_CASE("range-based-for")
         
         for(const auto& word : words)
         {
-            std::cout << word << "\n"            
+            std::cout << word << "\n";            
         }
     }
 
@@ -76,5 +76,4 @@ TEST_CASE("range-based-for")
             std::cout << item << "\n";
         }
     }
-
 }
