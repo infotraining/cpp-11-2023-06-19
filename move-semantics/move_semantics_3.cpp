@@ -1,3 +1,4 @@
+#include <array>
 #include <catch2/catch_test_macros.hpp>
 #include <iostream>
 #include <utility>
@@ -10,12 +11,14 @@ namespace
     class Data
     {
         std::string name_;
-        int* data_;
-        size_t size_;
+        int* data_{};
+        size_t size_{};
 
     public:
         using iterator = int*;
         using const_iterator = const int*;
+
+        Data() = default;
 
         Data(std::string name, std::initializer_list<int> list)
             : name_{std::move(name)}
@@ -154,7 +157,7 @@ TEST_CASE("Dataset")
 
 struct SuperDataSet
 {
-    std::vector<Data> data_rows;
+    std::array<Data, 3> data_rows;
 
     void print() const
     {
@@ -174,11 +177,12 @@ TEST_CASE("SuperDataSet")
 {
     SuperDataSet sds{
         {
-            {"one", {1, 2, 3}},
-            {"two", {4, 5, 6}},
-            {"three", {7, 8, 9}}
-        }
-    };
+            {
+                {"one", {1, 2, 3}},
+                {"two", {4, 5, 6}},
+                {"three", {7, 8, 9}}
+            }
+    }};
 
     std::cout << "------------------------------------------" << std::endl;
 
@@ -191,4 +195,64 @@ TEST_CASE("SuperDataSet")
     target.print();
 
     std::cout << "------------------------------------------" << std::endl;
+}
+
+//////////////////////////////////////
+// std::array
+
+namespace Explain
+{
+    template <typename T, size_t N>
+    struct array
+    {
+        T items[N];
+
+        using iterator = T*;
+        using const_iterator = const T*;
+        using reference = T&;
+
+        iterator begin()
+        {
+            return items;
+        }
+
+        iterator end()
+        {
+            return items + N;
+        }
+
+        size_t size() const
+        {
+            return N;
+        }
+
+        reference operator[](size_t index)
+        {
+            return items[index];
+        }
+    };
+}
+
+std::array<int, 3> get_coord()
+{
+    return {1, 2, 3};
+}
+
+TEST_CASE("array")
+{
+    int arr1[10] = {};
+    arr1[5] = 665;
+
+    std::array<int, 10> arr2 = {};
+
+    for (const auto& item : arr2)
+    {
+        std::cout << "\n";
+    }
+
+    auto arr3 = std::move(arr2);
+
+    std::array<Data, 2> ds = {Data{"ds1", {1, 2, 3}}, Data{"ds2", {1, 2, 3}}};
+
+    auto backup = std::move(ds);
 }

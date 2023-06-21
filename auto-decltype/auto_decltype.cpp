@@ -1,11 +1,11 @@
+#include <any>
 #include <catch2/catch_test_macros.hpp>
 #include <iostream>
-#include <string>
-#include <vector>
 #include <list>
-#include <tuple>
-#include <any>
 #include <map>
+#include <string>
+#include <tuple>
+#include <vector>
 
 using namespace std;
 
@@ -28,7 +28,7 @@ TEST_CASE("auto - first look")
         const auto* const ptr_x = &x;
 
         auto& y = x;
-    }    
+    }
 }
 
 TEST_CASE("const hell")
@@ -52,7 +52,7 @@ TEST_CASE("const hell")
     {
         int* const const_ptr_to_value = &x;
         // const_ptr_to_value = &x; // ERROR = pointer is const
-        
+
         (*const_ptr_to_value) = 665;
 
         CHECK(x == 665);
@@ -86,16 +86,16 @@ namespace Explain
 TEST_CASE("using auto")
 {
     int vec[] = {1, 2, 3, 4};
-    for(auto it = std::begin(vec); it != std::end(vec); ++it)
-    {   
+    for (auto it = std::begin(vec); it != std::end(vec); ++it)
+    {
         std::cout << *it << " ";
     }
 
-    for(size_t i = 0; i < Explain::size(vec); ++i)
+    for (size_t i = 0; i < Explain::size(vec); ++i)
     {
         std::cout << vec[i] << " ";
     }
-    
+
     std::cout << "\n";
 }
 
@@ -105,12 +105,12 @@ TEST_CASE("variable declaration & auto")
     auto ax = 42; // int
 
     int y(10);
-    auto ay(10);  // int
+    auto ay(10); // int
 
     int z{10};
-    auto az{10};  // int - since C++17
+    auto az{10};    // int - since C++17
 
-    auto lst = {1}; // std::initializer<int>    
+    auto lst = {1}; // std::initializer<int>
 }
 
 int foo(int arg)
@@ -121,26 +121,26 @@ int foo(int arg)
 template <typename T>
 void deduce1(T arg)
 {
-    //std::cout << __FUNCSIG__ << "\n";
-    std::cout << __PRETTY_FUNCTION__ << "\n";
+    std::cout << __FUNCSIG__ << "\n";
+    //std::cout << __PRETTY_FUNCTION__ << "\n";
 }
 
 TEST_CASE("auto type deduction - case 1")
 {
     int x = 10;
     auto ax1 = 10; // int
-    
+
     const int cx = 42;
     auto ax2 = cx; // int  - const is removed
 
     int& ref_x = x;
     auto ax4 = ref_x; // int - ref is removed
-    
+
     const int& cref_x = x;
     auto ax5 = cref_x; // int - ref is removed & const is removed
 
     int tab[10];
-    auto ax6 = tab; // int* - array decays to pointer    
+    auto ax6 = tab; // int* - array decays to pointer
 }
 
 TEST_CASE("auto type deduction - case 2")
@@ -156,16 +156,16 @@ TEST_CASE("auto type deduction - case 2")
 
     const int& cref_x = x;
     auto& ax4 = cref_x; // const int&
-    
+
     int tab[10];
     auto& ax5 = tab; // int (&ax5)[10]
 }
 
-struct Default 
-{ 
-    int foo() const { return 1; } 
+struct Default
+{
+    int foo() const { return 1; }
 };
- 
+
 struct NonDefault
 {
     NonDefault() = delete;
@@ -185,7 +185,7 @@ int bar()
 }
 
 template <typename T>
-auto multiply(T a, T b) 
+auto multiply(T a, T b)
 {
     return a * b;
 }
@@ -200,9 +200,9 @@ TEST_CASE("decltype")
     decltype(vec1) vec3;
     CHECK(vec3.size() == 0);
 
-    std::map<std::string, float> coll = { {"pi", 3.14f}, {"e", 2.81f } };
+    std::map<std::string, float> coll = {{"pi", 3.14f}, {"e", 2.81f}};
 
-    using RefFloat = decltype(coll.at(std::declval<std::string>())); 
+    using RefFloat = decltype(coll.at(std::declval<std::string>()));
     RefFloat pi = coll.at("pi");
 
     decltype(Default().foo()) obj1;
@@ -229,10 +229,10 @@ decltype(auto) get_nth(TContainer& container, size_t nth)
 }
 
 template <typename F, typename TArg>
-decltype(auto) call(F f, TArg arg)
+decltype(auto) call(F&& f, TArg&& arg)
 {
     std::cout << "Log: calling " << typeid(f).name() << "\n";
-    return f(arg);
+    return f(std::forward<TArg>(arg));
 }
 
 TEST_CASE("get_nth")
@@ -255,4 +255,3 @@ TEST_CASE("get_nth")
 
     std::cout << call(describe_number, 42) << "\n";
 }
-

@@ -29,19 +29,30 @@ void have_fun(Gadget&& g)
     g.use();
 }
 
-void use(Gadget& g)
-{
-    have_fun(g);
-}
+// void use(Gadget& g)
+// {
+//     have_fun(g);
+// }
 
-void use(const Gadget& g)
-{
-    have_fun(g);
-}
+// void use(const Gadget& g)
+// {
+//     have_fun(g);
+// }
 
-void use(Gadget&& g)
+// void use(Gadget&& g)
+// {
+//     have_fun(std::move(g));
+// }
+
+template <typename TG>
+void use(TG&& g)
 {
-    have_fun(std::move(g));
+    have_fun(std::forward<TG>(g));
+    
+    // if constexpr(std::is_reference_v<TG>)
+    //     have_fun(g);
+    // else
+    //     have_fun(std::move(g));
 }
 
 // TEST_CASE("4---")
@@ -49,12 +60,12 @@ void use(Gadget&& g)
 //     std::cout << "\n--------------------------\n\n";
 // }
 
-// TEST_CASE("custom forwarding")
-// {
-//     Gadget g{1, "gadget"};
-//     const Gadget cg{2, "const-gadget"};
+TEST_CASE("custom forwarding")
+{
+    Gadget g{1, "gadget"};
+    const Gadget cg{2, "const-gadget"};
 
-//     use(g);
-//     use(cg);
-//     use(Gadget{3, "temp-gadget"});
-// }
+    use(g); // g is lvalue
+    use(cg); // cg lvalue
+    use(Gadget{3, "temp-gadget"}); // rvalue
+}
