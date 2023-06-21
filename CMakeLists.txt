@@ -48,6 +48,8 @@ add_subdirectory(tuples)
 add_subdirectory(uniform-initialization)
 add_subdirectory(variadic-templates)
 add_subdirectory(dataset)
+add_subdirectory(lambdas)
+add_subdirectory(constexpr)
 
 add_subdirectory(_exercises/find-null-ex)
 add_subdirectory(_exercises/auto-declarations-ex)
