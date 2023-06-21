@@ -86,9 +86,19 @@ UniquePtr<Gadget> create_gadget()
     return UniquePtr<Gadget>(new Gadget{id, "Gadget#" + std::to_string(id) });
 }
 
+namespace Explain
+{
+    template <typename T, typename... TArgs>
+    UniquePtr<T> make_unique(TArgs&&... args)
+    {
+        return UniquePtr<T>{new T(std::forward<TArgs>(args)...)};
+    }
+}
+
 TEST_CASE("move semantics - UniquePtr")
 {
-    UniquePtr<Gadget> pg1{new Gadget{1, "ipad"}};
+    //UniquePtr<Gadget> pg1{new Gadget{1, "ipad"}};
+    auto pg1 = Explain::make_unique<Gadget>(1, "ipad");
     pg1->use();
 
     UniquePtr<Gadget> pg2 = std::move(pg1);         // move constructor

@@ -69,3 +69,42 @@ TEST_CASE("custom forwarding")
     use(cg); // cg lvalue
     use(Gadget{3, "temp-gadget"}); // rvalue
 }
+
+
+template <typename F, typename... TArg>
+decltype(auto) call(F&& f, TArg&&... arg)
+{
+    std::cout << "Log: calling " << typeid(f).name() << "\n";
+    return f(std::forward<TArg>(arg)...);
+}
+
+// template <typename F, typename TArg1, typename TArg2>
+// decltype(auto) call(F&& f, TArg1&& arg1, TArg1&& arg2)
+// {
+//     std::cout << "Log: calling " << typeid(f).name() << "\n";
+//     return f(std::forward<TArg1>(arg1), std::forward<TArg2>(arg2));
+// }
+
+template< int tries = 1, typename F, typename... Args  >
+auto timing(F&& f, Args&&... args)
+{
+    auto start = std::chrono::steady_clock::now();
+    for (int i{ 0 }; i < tries; ++i) std::invoke(f, std::forward<Args>(args)...);
+    return std::chrono::duration<double>(std::chrono::steady_clock::now() - start).count(); // value in seconds
+}
+
+void foo(int)
+{
+    std::cout << "foo(int)" << "\n";
+}
+
+void bar(int, int)
+{
+    std::cout << "foo(int, int)" << "\n";    
+}
+
+TEST_CASE("call")
+{
+    call(foo, 42);
+    call(bar, 45, 56);
+}
