@@ -99,31 +99,3 @@ TEST_CASE("lookup table")
     constexpr auto squares = create_lookup_table<100>([](int x)
         { return x * x; });
 }
-
-namespace ExpertNeverFire
-{
-    template <size_t n>
-    struct factorial : std::integral_constant<size_t, n * factorial<n - 1>::value>
-    {
-    };
-
-    template <>
-    struct factorial<0> : std::integral_constant<size_t, 1>
-    {
-    };
-
-    template <size_t... i>
-    static constexpr auto init_factorial(std::integer_sequence<size_t, i...>)
-    {
-        return std::array{(factorial<i>::value)...};
-    };
-
-    template <size_t size>
-    static constexpr std::array<size_t, size> init_factorial()
-    {
-        return init_factorial(std::make_integer_sequence<size_t, size>{});
-    };
-
-    for (auto x : init_factorial<15>())
-        std::cout << x << std::endl;
-}
