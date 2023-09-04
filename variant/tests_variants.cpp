@@ -172,6 +172,8 @@ TEST_CASE("visiting variants")
 
 		v2 = std::vector{1, 2, 3};
 		std::visit(printer, v2);
+
+		auto lambda = [](auto... args) { };
 	}
 }
 
