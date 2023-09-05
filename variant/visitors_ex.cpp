@@ -9,6 +9,22 @@
 
 using namespace std;
 
+/////////////////////////////////////
+// IsSimilar
+
+template <typename T1, typename T2>
+struct IsSimilar
+{
+    static constexpr bool value = std::is_same_v<std::decay_t<T1>, std::decay_t<T2>>;
+};
+
+template <typename T1, typename T2>
+constexpr bool IsSimilar_v = IsSimilar<T1, T2>::value;
+
+static_assert(IsSimilar_v<int, const int>);
+static_assert(IsSimilar_v<int, const int&>);
+static_assert(IsSimilar_v<int, int&>);
+
 namespace ClassicPoly
 {
     struct Shape
@@ -102,7 +118,7 @@ namespace VariantPoly
 
         ShapeType shp;
 
-        template <typename T>
+        template <typename T> 
         Shape(T&& s) : shp{std::forward<T>(s)}
         {}        
 
@@ -199,9 +215,9 @@ TEST_CASE("variant poly")
 
     std::cout << "Total area: " << total_area << "\n";
 
-    //Shape shp1 = Circle{2};
-
+    Shape shp1 = Circle{2};
     //Shape shp2 = shp1; // cc
+    //CHECK(shp1.area() == shp2.area());
 }
 
 int foo(int arg)
@@ -319,7 +335,7 @@ template <typename T>
 using RemoveConst_t = typename RemoveConst<T>::type;
 
 TEST_CASE("using traits")
-{
+{    
     void* raw_mem{};
     //use_pointer(raw_mem);
 
@@ -331,19 +347,5 @@ TEST_CASE("using traits")
     static_assert(std::is_same_v<RemoveConst_t<MyConstType>, int>);    
 }
 
-/////////////////////////////////////
-// IsSimilar
 
-template <typename T1, typename T2>
-struct IsSimilar
-{
-    static constexpr bool value = std::is_same_v<std::decay_t<T1>, std::decay_t<T2>>;
-};
-
-template <typename T1, typename T2>
-constexpr bool IsSimilar_v = IsSimilar<T1, T2>::value;
-
-static_assert(IsSimilar_v<int, const int>);
-static_assert(IsSimilar_v<int, const int&>);
-static_assert(IsSimilar_v<int, int&>);
 
