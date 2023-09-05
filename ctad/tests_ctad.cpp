@@ -14,19 +14,19 @@ void foo(int)
 template <typename T>
 void deduce1(T arg)
 {
-    puts(__PRETTY_FUNCTION__);
+    //puts(__PRETTY_FUNCTION__);
 }
 
 template <typename T>
 void deduce2(T& arg)
 {
-    puts(__PRETTY_FUNCTION__);
+    //puts(__PRETTY_FUNCTION__);
 }
 
 template <typename T>
 void deduce3(T&& arg)
 {
-    puts(__PRETTY_FUNCTION__);
+    //puts(__PRETTY_FUNCTION__);
 }
 
 TEST_CASE("Template Argument Deduction - case 1")

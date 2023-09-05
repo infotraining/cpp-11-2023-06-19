@@ -47,6 +47,9 @@ struct NoDefault
 	int value;
 
 	NoDefault() = delete;
+
+	NoDefault(int value) : value{value}
+	{}
 };
 
 TEST_CASE("variant - monostate")

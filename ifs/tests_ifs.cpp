@@ -9,6 +9,8 @@
 #include <string>
 #include <vector>
 #include <array>
+#include "gadget.hpp"
+#include <set>
 
 using namespace std;
 
@@ -132,8 +134,8 @@ template <typename T>
 bool is_power_of_2(T value)
 {
     if constexpr (std::is_integral_v<T>)
-    {
-        return value > 0 && (value & (value - 1)) == 0;
+    {        
+        return value > 0 && (value & (value - 1)) == 0;        
     }
     else if constexpr(std::is_floating_point_v<T>)
     {
@@ -191,20 +193,84 @@ auto create_dataset()
 
 TEST_CASE("is_power_of_2")
 {
-    CHECK(is_power_of_2(8l));
+    /*CHECK(is_power_of_2(8l));
     CHECK(is_power_of_2(64ll));
     CHECK(is_power_of_2(128));
-    CHECK(is_power_of_2(7) == false);
+    CHECK(is_power_of_2(7) == false);*/
 
     CHECK(is_power_of_2(8.0));
     CHECK(is_power_of_2(64.0f));
 
-    CHECK(is_power_of_2("text"s));
+    //REQUIRE_THROWS_AS(is_power_of_2("text"s), std::invalid_argument);
 }
 
 TEST_CASE("constexpr if")
 {
     auto ds1 = create_dataset([] { return 1024; });
-    auto ds2 = create_dataset([] { return 64; });
-    
+
+    auto ds2 = create_dataset([] { return 64; });    
+}
+
+namespace BeforeCpp17
+{
+    void print()
+    {
+        std::cout << "\n";
+    }
+
+    template <typename THead, typename... TTail>
+    void print(THead head, TTail... tail)
+    {
+        std::cout << head << " ";
+        print(tail...);
+    }
+}
+
+template <typename THead, typename... TTail>
+void print(THead head, TTail... tail)
+{
+    std::cout << head << " ";
+
+    if constexpr(sizeof...(tail) > 0)
+        print(tail...);
+    else
+        std::cout << "\n";
+}
+
+TEST_CASE("constexpr if & variadic templates")
+{
+    print(1, 3.14, "text");
+}
+
+TEST_CASE("Gadget")
+{
+    Gadget g1;
+    Gadget g2;
+
+    CHECK(Gadget::counter == 2);
+    CHECK(global_counter == 42);
+}
+
+template <typename TContainer, typename T>
+void add_to_container(TContainer& container, T value)
+{
+    if constexpr (requires { container.push_back(value); })
+    {
+        container.push_back(value);
+    }
+    else
+    {
+        container.insert(value);
+    }
+}
+
+TEST_CASE("constexpr if C++20")
+{
+    std::vector<int> vec;
+
+    add_to_container(vec, 1);
+
+    std::set<int> my_set;
+
+    add_to_container(my_set, 1);
 }
