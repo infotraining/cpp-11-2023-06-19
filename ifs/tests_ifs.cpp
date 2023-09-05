@@ -251,8 +251,8 @@ TEST_CASE("Gadget")
     CHECK(global_counter == 42);
 }
 
-template <typename TContainer, typename T>
-void add_to_container(TContainer& container, T value)
+//template <typename TContainer, typename T>
+void add_to_container(auto& container, auto value)
 {
     if constexpr (requires { container.push_back(value); })
     {

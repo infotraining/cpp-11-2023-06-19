@@ -52,10 +52,10 @@ namespace
 
         ///////////////////////////////////////////////
         // move constructor
-        Data(Data&& source)
-            : name_{std::move(source.name_)}
-            , data_{std::exchange(source.data_, nullptr)}
-            , size_{std::exchange(source.size_, 0)}
+        Data(Data&& source) noexcept
+            : name_{std::move(source.name_)} // noexcept
+            , data_{std::exchange(source.data_, nullptr)} // noexcept
+            , size_{std::exchange(source.size_, 0)} // noexcept
         {
             std::cout << "Data(" << name_ << ", " << data_ << ": mv)\n";
         }
@@ -74,12 +74,14 @@ namespace
             return *this;
         }
 
-        ~Data()
+        ~Data() noexcept
         {
             if (data_)
                 std::cout << "~Data(" << name_ << ", " << data_ << ")\n";
             else
                 std::cout << "~Data(after move)\n";
+
+            throw 14;
 
             delete[] data_;
         }
@@ -255,4 +257,21 @@ TEST_CASE("array")
     std::array<Data, 2> ds = {Data{"ds1", {1, 2, 3}}, Data{"ds2", {1, 2, 3}}};
 
     auto backup = std::move(ds);
+}
+
+TEST_CASE("noexcept")
+{
+    std::cout << "\n\n-----------------------------------\n";
+    {
+        std::vector<Data> vec;
+
+        vec.push_back(Data{"ds1", {1, 2, 3, 4}});
+        vec.push_back(Data{"ds2", {1, 2, 3, 4}});
+        vec.push_back(Data{"ds3", {1, 2, 3, 4}});
+        vec.push_back(Data{"ds4", {1, 2, 3, 4}});
+        vec.push_back(Data{"ds5", {1, 2, 3, 4}});
+        vec.push_back(Data{"ds6", {1, 2, 3, 4}});
+
+    }
+    std::cout << "\n\n-----------------------------------\n";
 }

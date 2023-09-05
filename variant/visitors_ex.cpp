@@ -15,7 +15,8 @@ using namespace std;
 template <typename T1, typename T2>
 struct IsSimilar
 {
-    static constexpr bool value = std::is_same_v<std::decay_t<T1>, std::decay_t<T2>>;
+    static constexpr bool value = 
+        std::is_same_v<std::decay_t<T1>, std::decay_t<T2>>;
 };
 
 template <typename T1, typename T2>
@@ -118,7 +119,7 @@ namespace VariantPoly
 
         ShapeType shp;
 
-        template <typename T> 
+        template <typename T, typename = std::enable_if_t<!IsSimilar_v<T, Shape>>> 
         Shape(T&& s) : shp{std::forward<T>(s)}
         {}        
 
@@ -216,8 +217,8 @@ TEST_CASE("variant poly")
     std::cout << "Total area: " << total_area << "\n";
 
     Shape shp1 = Circle{2};
-    //Shape shp2 = shp1; // cc
-    //CHECK(shp1.area() == shp2.area());
+    Shape shp2 = shp1; // cc
+    CHECK(shp1.area() == shp2.area());
 }
 
 int foo(int arg)
