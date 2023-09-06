@@ -10,6 +10,8 @@
 #include <array>
 #include <set>
 #include <map>
+#include <memory_resource>
+#include <list>
 
 using namespace std;
 
@@ -193,4 +195,159 @@ TEST_CASE("comparisons")
 
 	CHECK(d1 == Data{1, "one"});
 	CHECK(d1 < Data{1, "two"});
+}
+
+/////////////////////////////////////////////////
+// iteration over tuple
+
+template <size_t... Is>
+struct IndexSequence
+{};
+
+IndexSequence<0, 1, 2> is1{};
+IndexSequence<0, 1, 2, 3> is2{};
+IndexSequence<1, 1, 2, 2> is3{};
+
+template <typename F, typename... Ts>
+void index_demo(const std::tuple<Ts...>& tpl, F f)
+{
+	f(std::get<0>(tpl));
+	f(std::get<1>(tpl));
+	f(std::get<2>(tpl));
+}
+
+template <typename F, typename... Ts, size_t... Is>
+void index_demo_impl(const std::tuple<Ts...>& tpl, F f, IndexSequence<Is...> /*<0, 1, 2>*/)
+{
+	(..., f(std::get<Is>(tpl)));
+}
+
+/////////////////////////////////////
+// tuple_for_each
+
+template <typename F, typename... Ts, size_t... Is>
+void tuple_for_each_impl(const std::tuple<Ts...>& tpl, F f, std::index_sequence<Is...> /*<0, 1, 2>*/)
+{
+	(..., f(std::get<Is>(tpl)));
+}
+
+template <typename F, typename... Ts>
+void tuple_for_each(const std::tuple<Ts...>& tpl, F f)
+{
+	tuple_for_each_impl(tpl, f, std::make_index_sequence<sizeof...(Ts)>{});
+}
+
+////////////////////////////////////
+
+
+TEST_CASE("iteration over tuple")
+{
+	std::tuple tpl{1, 3.14, "text"};
+
+	index_demo(tpl, [](const auto& item) { std::cout << item << "\n"; });
+
+	index_demo_impl(tpl, [](const auto& item) { std::cout << item << "\n"; }, 
+					IndexSequence<0, 1, 2>{});
+
+	tuple_for_each(tpl, [](const auto& item) { std::cout << item << "\n"; });
+}
+
+template <typename... TArgs>
+auto sum(TArgs... args) // sum(1, 2, 3, 4)
+{
+	return (... + args);  //(((1 + 2) + 3) + 4);
+}
+
+template <typename... TArgs>
+auto sum_r(TArgs... args) // sum_r(1, 2, 3, 4)
+{
+	return (args + ...);  // sum(1 + (2 + (3 + 4)));
+}
+
+template <typename F, typename... TArgs>
+auto call_for_all(F f, TArgs... args) // call_for_all(f, 1, 2, 3, 4)
+{
+	(..., f(args)); // f(1), f(2), f(3), f(4); // fold expression for , operator
+}
+
+TEST_CASE("fold expressions")
+{
+	CHECK(sum(1, 2, 3, 4) == 10);
+
+	call_for_all([](const auto& item) { std::cout << item << "\n"; }, 52, 55, 23);
+
+	auto print = [](const auto& item) { std::cout << item << "\n"; };
+
+	//index_demo_impl(std::tuple{"t1", "t2"}, print, IndexSequence<0, 1>{});
+
+	tuple_for_each(std::tuple{"t1", "t2"}, print);
+}
+
+TEST_CASE("Data & tuple_for_each")
+{
+	Data d1{1,"pi"};
+
+	auto print = [](const auto& item) { std::cout << item << "\n"; };
+	tuple_for_each(d1.tied(), print);
+}
+
+template<typename Func>
+auto benchmark(Func test_func, int iterations)
+{
+	const auto start = std::chrono::system_clock::now();
+	while (iterations-- > 0)
+		test_func();
+	const auto stop = std::chrono::system_clock::now();
+	const auto secs = std::chrono::duration<double>(stop - start);
+	return secs.count();
+}
+
+TEST_CASE("benchmark")
+{
+	constexpr int iterations{100};
+	constexpr int total_nodes{20'000};
+
+	auto default_std_alloc = [total_nodes]
+		{
+			std::list<int> list;
+			for (int i{}; i != total_nodes; ++i)
+				list.push_back(i);
+		};
+
+	auto default_pmr_alloc = [total_nodes]
+		{
+			std::pmr::list<int> list;
+			for (int i{}; i != total_nodes; ++i)
+				list.push_back(i);
+		};
+
+	auto pmr_alloc_no_buf = [total_nodes]
+		{
+			std::pmr::monotonic_buffer_resource mbr;
+			std::pmr::polymorphic_allocator<int> pa{&mbr};
+			std::pmr::list<int> list{pa};
+			for (int i{}; i != total_nodes; ++i)
+				list.push_back(i);
+		};
+
+	auto pmr_alloc_and_buf = [total_nodes]
+		{
+			std::array<std::byte, total_nodes * 32> buffer; // enough to fit in all nodes
+			std::pmr::monotonic_buffer_resource mbr{buffer.data(), buffer.size()};
+			std::pmr::polymorphic_allocator<int> pa{&mbr};
+			std::pmr::list<int> list{pa};
+			for (int i{}; i != total_nodes; ++i)
+				list.push_back(i);
+		};
+
+	const double t1 = benchmark(default_std_alloc, iterations);
+	const double t2 = benchmark(default_pmr_alloc, iterations);
+	const double t3 = benchmark(pmr_alloc_no_buf, iterations);
+	const double t4 = benchmark(pmr_alloc_and_buf, iterations);
+
+	std::cout << std::fixed << std::setprecision(3)
+		<< "t1 (default std alloc): " << t1 << " sec; t1/t1: " << t1 / t1 << '\n'
+		<< "t2 (default pmr alloc): " << t2 << " sec; t1/t2: " << t1 / t2 << '\n'
+		<< "t3 (pmr alloc  no buf): " << t3 << " sec; t1/t3: " << t1 / t3 << '\n'
+		<< "t4 (pmr alloc and buf): " << t4 << " sec; t1/t4: " << t1 / t4 << '\n';
 }

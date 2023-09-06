@@ -60,6 +60,8 @@ add_subdirectory(optional)
 add_subdirectory(string-view)
 add_subdirectory(structured-bindings)
 add_subdirectory(variant)
+add_subdirectory(threads)
+add_subdirectory(pi)
 
 add_subdirectory(_exercises/find-null-ex)
 add_subdirectory(_exercises/auto-declarations-ex)
